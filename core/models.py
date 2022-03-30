@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class ModelBase(models.Model):
     id = models.AutoField(
         primary_key=True,
@@ -19,6 +20,7 @@ class ModelBase(models.Model):
     class Meta:
         abstract = True
 
+
 class Zone(ModelBase):
     name = models.CharField(
         null=False,
@@ -29,6 +31,7 @@ class Zone(ModelBase):
     class Meta:
         db_table = 'zone'
         managed = True
+
 
 class Department(ModelBase):
     name = models.CharField(
@@ -44,6 +47,7 @@ class Department(ModelBase):
     def __str__(self):
         return self.name
 
+
 class MaritalStatus(ModelBase):
     name = models.CharField(
         null=False,
@@ -55,13 +59,14 @@ class MaritalStatus(ModelBase):
         db_table = 'marital_status'
         managed = True
 
+
 class State(ModelBase):
     name = models.CharField(
         null=False,
         max_length=104,
         unique=True
     )
-    abreviation = models.CharField(
+    abbreviation = models.CharField(
         null=False,
         max_length=2
     )
@@ -69,6 +74,7 @@ class State(ModelBase):
     class Meta:
         db_table = 'state'
         managed = True
+
 
 class City(ModelBase):
     name = models.CharField(
@@ -85,6 +91,7 @@ class City(ModelBase):
     class Meta:
         db_table = 'city'
         managed = True
+
 
 class District(ModelBase):
     name = models.CharField(
@@ -107,6 +114,7 @@ class District(ModelBase):
     class Meta:
         db_table = 'district'
         managed = True
+
 
 class Employee(ModelBase):
 
@@ -155,4 +163,195 @@ class Employee(ModelBase):
 
     class Meta:
         db_table = 'employee'
+        managed = True
+
+
+class Customer(ModelBase):
+
+    class Gender(models.TextChoices):
+        MALE = ('M', 'Male')
+        FEMALE = ('F', 'Female')
+
+    name = models.CharField(
+        null=False,
+        max_length=104,
+    )
+    income = models.DecimalField(
+        null=False,
+        max_digits=16,
+        decimal_places=2
+    )
+    gender = models.CharField(
+        null=False,
+        max_length=1,
+        choices=Gender.choices
+    )
+    marital_status = models.ForeignKey(
+        to='MaritalStatus',
+        on_delete=models.DO_NOTHING,
+        db_column='id_marital_status',
+        null=False
+    )
+    district = models.ForeignKey(
+        to='District',
+        on_delete=models.DO_NOTHING,
+        db_column='id_district',
+        null=False
+    )
+
+    class Meta:
+        db_table = 'customer'
+        managed = True
+
+
+class Branch(ModelBase):
+    name = models.CharField(
+        null=False,
+        max_length=104,
+        unique=True
+    )
+    district = models.ForeignKey(
+        to='District',
+        on_delete=models.DO_NOTHING,
+        db_column='id_district',
+        null=False
+    )
+
+    class Meta:
+        db_table = 'branch'
+        managed = True
+
+
+class Supplier(ModelBase):
+    name = models.CharField(
+        null=False,
+        max_length=104,
+        unique=True
+    )
+    legal_document = models.CharField(
+        null=False,
+        max_length=104,
+        unique=True
+    )
+
+    class Meta:
+        db_table = 'supplier'
+        managed = True
+
+
+class ProductGroup(ModelBase):
+    name = models.CharField(
+        null=False,
+        max_length=104,
+        unique=True
+    )
+    commission_percentage = models.DecimalField(
+        null=False,
+        max_digits=5,
+        decimal_places=2
+    )
+    gain_percentage = models.DecimalField(
+        null=False,
+        max_digits=5,
+        decimal_places=2
+    )
+
+    class Meta:
+        db_table = 'product_group'
+        managed = True
+
+
+class Product(ModelBase):
+    name = models.CharField(
+        null=False,
+        max_length=104,
+        unique=True
+    )
+    cost_price = models.DecimalField(
+        null=False,
+        max_digits=16,
+        decimal_places=2
+    )
+    sale_price = models.DecimalField(
+        null=False,
+        max_digits=16,
+        decimal_places=2
+    )
+    supplier = models.ForeignKey(
+        to='Supplier',
+        on_delete=models.DO_NOTHING,
+        db_column='id_supplier',
+        null=False
+    )
+    product_group = models.ForeignKey(
+        to='ProductGroup',
+        on_delete=models.DO_NOTHING,
+        db_column='id_product_group',
+        null=False
+    )
+
+    class Meta:
+        db_table = 'product'
+        managed = True
+
+class Sale(ModelBase):
+    date = models.DateTimeField(
+        null=False,
+        auto_now_add=True
+    )
+    cost_price = models.DecimalField(
+        null=False,
+        max_digits=16,
+        decimal_places=2
+    )
+    sale_price = models.DecimalField(
+        null=False,
+        max_digits=16,
+        decimal_places=2
+    )
+    branch = models.ForeignKey(
+        to='Branch',
+        on_delete=models.DO_NOTHING,
+        db_column='id_branch',
+        null=False
+    )
+    customer = models.ForeignKey(
+        to='Customer',
+        on_delete=models.DO_NOTHING,
+        db_column='id_customer',
+        null=False
+    )
+    employee = models.ForeignKey(
+        to='Employee',
+        on_delete=models.DO_NOTHING,
+        db_column='id_employee',
+        null=False
+    )
+
+    class Meta:
+        db_table = 'sale'
+        managed = True
+
+
+class SaleItem(ModelBase):
+    quantity = models.DecimalField(
+        null=False,
+        max_digits=16,
+        decimal_places=3
+    )
+    sale = models.ForeignKey(
+        to='Sale',
+        on_delete=models.DO_NOTHING,
+        db_column='id_sale',
+        null=False
+    )
+    product = models.ForeignKey(
+        to='Product',
+        on_delete=models.DO_NOTHING,
+        db_column='id_product',
+        null=False
+    )
+
+    class Meta:
+        db_table = 'sale_item'
         managed = True
